@@ -1,6 +1,8 @@
 use std::sync::atomic::Ordering;
 
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers, MouseButton, MouseEventKind};
+use crossterm::event::{
+    self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind,
+};
 
 use crate::app::{App, InputMode};
 
@@ -15,7 +17,12 @@ pub fn handle_event(app: &mut App) -> anyhow::Result<bool> {
 
 pub fn dispatch(app: &mut App, evt: &Event) {
     match evt {
-        Event::Key(key) => handle_key(app, *key),
+        Event::Key(key) => {
+            if key.kind == KeyEventKind::Release {
+                return;
+            }
+            handle_key(app, *key)
+        }
         Event::Mouse(mouse) => match mouse.kind {
             MouseEventKind::ScrollUp if app.in_tail_mode() => {
                 app.exit_tail_mode();
